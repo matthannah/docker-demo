@@ -1,0 +1,27 @@
+# Docker compose version
+version: '3'
+
+services:
+  rabbit-mq:
+    # Use image from docker hub
+    image: rabbitmq:3.6.12-management
+    # Expose 5672 and 15672, note this only makes them visible to those just outside the container!
+    expose:
+      - 5672
+      - 15672
+    # Map host ports to exposed container ports :)
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+  app:
+    # We can build the image from Dockerfile in ./app
+    build: ./app
+    # Create a dependency on rabbit-mq service
+    depends_on:
+      - rabbit-mq
+    # Run this command when the container is started
+    command: /bin/sh -c "sleep 5 && python -u /src/main.py"
+    # Mount host directory ./app/src on container /src directory
+    volumes:
+      - ./app/src:/src
